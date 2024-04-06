@@ -1,117 +1,119 @@
-# typescript-npm-package-template
+# @ezee/http-errors
 
-> Template to kickstart creating a Node.js module using TypeScript and VSCode
-
-Inspired by [node-module-boilerplate](https://github.com/sindresorhus/node-module-boilerplate)
-
-## Features
-
-- [Semantic Release](https://github.com/semantic-release/semantic-release)
-- [Issue Templates](https://github.com/ryansonshine/typescript-npm-package-template/tree/main/.github/ISSUE_TEMPLATE)
-- [GitHub Actions](https://github.com/ryansonshine/typescript-npm-package-template/tree/main/.github/workflows)
-- [Codecov](https://about.codecov.io/)
-- [VSCode Launch Configurations](https://github.com/ryansonshine/typescript-npm-package-template/blob/main/.vscode/launch.json)
-- [TypeScript](https://www.typescriptlang.org/)
-- [Husky](https://github.com/typicode/husky)
-- [Lint Staged](https://github.com/okonet/lint-staged)
-- [Commitizen](https://github.com/search?q=commitizen)
-- [Jest](https://jestjs.io/)
-- [ESLint](https://eslint.org/)
-- [Prettier](https://prettier.io/)
-
-## Getting started
-
-### Set up your repository
-
-**Click the "Use this template" button.**
-
-Alternatively, create a new directory and then run:
-
-```bash
-curl -fsSL https://github.com/ryansonshine/typescript-npm-package-template/archive/main.tar.gz | tar -xz --strip-components=1
-```
-
-Replace `FULL_NAME`, `GITHUB_USER`, and `REPO_NAME` in the script below with your own details to personalize your new package:
-
-```bash
-FULL_NAME="John Smith"
-GITHUB_USER="johnsmith"
-REPO_NAME="my-cool-package"
-sed -i.mybak "s/\([\/\"]\)(ryansonshine)/$GITHUB_USER/g; s/typescript-npm-package-template\|my-package-name/$REPO_NAME/g; s/Ryan Sonshine/$FULL_NAME/g" package.json package-lock.json README.md
-rm *.mybak
-```
-
-### Add NPM Token
-
-Add your npm token to your GitHub repository secrets as `NPM_TOKEN`.
-
-### Add Codecov integration
-
-Enable the Codecov GitHub App [here](https://github.com/apps/codecov).
-
-**Remove everything from here and above**
-
----
-
-# my-package-name
-
-[![npm package][npm-img]][npm-url]
-[![Build Status][build-img]][build-url]
-[![Downloads][downloads-img]][downloads-url]
-[![Issues][issues-img]][issues-url]
-[![Code Coverage][codecov-img]][codecov-url]
-[![Commitizen Friendly][commitizen-img]][commitizen-url]
-[![Semantic Release][semantic-release-img]][semantic-release-url]
-
-> My awesome module
+> Create beautiful and consistent HTTP errors with ease.
 
 ## Install
 
+### With npm
+
 ```bash
-npm install my-package-name
+npm install @ezee/http-errors
+```
+
+### With yarn
+
+```bash
+yarn add @ezee/http-errors
+```
+
+### With pnpm
+
+```bash
+pnpm add @ezee/http-errors
 ```
 
 ## Usage
 
 ```ts
-import { myPackage } from 'my-package-name';
+import httpErrors from '@ezee/http-errors';
 
-myPackage('hello');
-//=> 'hello from my package'
+const error = new httpErrors.Notfound({
+  message: 'User not found',
+  code: 'USER_NOT_FOUND',
+  meta: {
+    userId: 123,
+  },
+});
 ```
 
-## API
+### How to instanciate an error
 
-### myPackage(input, options?)
+```ts
+const error = new httpErrors.<ErrorName>(options);
+```
 
-#### input
+### Options
 
-Type: `string`
+- `message` - The error message.
+- `code` - The error code.
+- `meta` - Additional information about the error. In `object` format. (optional)
 
-Lorem ipsum.
+## Available Errors
 
-#### options
+- BadRequest
+- Unauthorized
+- Forbidden
+- Notfound
+- MethodNotAllowed
+- Conflict
+- InternalServerError
+- NotImplemented
+- ServiceUnavailable
+- GatewayTimeout
+- PaymentRequired
 
-Type: `object`
+## Examples
 
-##### postfix
+### With express
 
-Type: `string`
-Default: `rainbows`
+```ts
+import express from 'express';
+import httpErrors from '@ezee/http-errors';
 
-Lorem ipsum.
+const app = express();
 
-[build-img]:https://github.com/ryansonshine/typescript-npm-package-template/actions/workflows/release.yml/badge.svg
-[build-url]:https://github.com/ryansonshine/typescript-npm-package-template/actions/workflows/release.yml
-[downloads-img]:https://img.shields.io/npm/dt/typescript-npm-package-template
-[downloads-url]:https://www.npmtrends.com/typescript-npm-package-template
-[npm-img]:https://img.shields.io/npm/v/typescript-npm-package-template
-[npm-url]:https://www.npmjs.com/package/typescript-npm-package-template
-[issues-img]:https://img.shields.io/github/issues/ryansonshine/typescript-npm-package-template
-[issues-url]:https://github.com/ryansonshine/typescript-npm-package-template/issues
-[codecov-img]:https://codecov.io/gh/ryansonshine/typescript-npm-package-template/branch/main/graph/badge.svg
-[codecov-url]:https://codecov.io/gh/ryansonshine/typescript-npm-package-template
-[semantic-release-img]:https://img.shields.io/badge/%20%20%F0%9F%93%A6%F0%9F%9A%80-semantic--release-e10079.svg
-[semantic-release-url]:https://github.com/semantic-release/semantic-release
-[commitizen-img]:https://img.shields.io/badge/commitizen-friendly-brightgreen.svg
-[commitizen-url]:http://commitizen.github.io/cz-cli/
+app.get('/user/:id', (req, res, next) => {
+  const { id } = req.params;
+
+  if (id !== '123') {
+    return next(
+      new httpErrors.Notfound({
+        message: 'User not found',
+        code: 'USER_NOT_FOUND',
+        meta: {
+          userId: id,
+        },
+      })
+    );
+  }
+
+  res.json({ id, name: 'John Doe' });
+});
+```
+
+### With koa
+
+```ts
+import Koa from 'koa';
+import httpErrors from '@ezee/http-errors';
+
+const app = new Koa();
+
+app.use(async (ctx, next) => {
+  const { id } = ctx.params;
+
+  if (id !== '123') {
+    ctx.throw(
+      new httpErrors.Notfound({
+        message: 'User not found',
+        code: 'USER_NOT_FOUND',
+        meta: {
+          userId: id,
+        },
+      })
+    );
+  }
+
+  ctx.body = { id, name: 'John Doe' };
+});
+```
