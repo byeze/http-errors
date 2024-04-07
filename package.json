@@ -1,7 +1,7 @@
 {
   "$schema": "http://json.schemastore.org/package",
   "name": "@ezee/http-errors",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "private": false,
   "description": "A simple package to create HTTP errors for Typescript projects",
   "main": "./lib/index.js",
